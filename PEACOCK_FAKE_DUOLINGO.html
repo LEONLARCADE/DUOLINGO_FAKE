@@ -1,0 +1,1916 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>MentorAI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════
+   ROOT & RESET
+═══════════════════════════════ */
+:root {
+  --bg: #FAFAF8;
+  --surface: #FFFFFF;
+  --surface2: #F4F4F1;
+  --border: #EBEBEB;
+  --text: #111111;
+  --text2: #555555;
+  --text3: #AAAAAA;
+  --accent: #FF5733;
+  --accent-light: #FFF1EE;
+  --accent-dark: #D93D1A;
+  --green: #00B894;
+  --green-light: #E6FBF7;
+  --red: #E84545;
+  --red-light: #FDECEC;
+  --yellow: #F6B93B;
+  --yellow-light: #FEF6E4;
+  --blue: #3867D6;
+  --blue-light: #EEF3FF;
+  --purple: #8854D0;
+  --purple-light: #F3EEFF;
+
+  /* module accent colors */
+  --m0: #FF5733; --m1: #00B894; --m2: #3867D6; --m3: #8854D0; --m4: #F6B93B; --m5: #E84545;
+
+  --r-sm: 10px; --r: 16px; --r-lg: 20px; --r-xl: 28px;
+  --shadow: 0 2px 12px rgba(0,0,0,.07);
+  --shadow-md: 0 6px 24px rgba(0,0,0,.1);
+  --shadow-lg: 0 16px 48px rgba(0,0,0,.14);
+
+  --font-display: Impact, 'Instrument Serif', Georgia, serif;
+  --font-body: 'Plus Jakarta Sans', sans-serif;
+  --nav-h: 72px;
+  --top-h: 60px;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+html { scroll-behavior:smooth; }
+body {
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ═══════════════════════════════
+   SCREEN SYSTEM
+═══════════════════════════════ */
+.screen { display:none; flex-direction:column; min-height:100vh; }
+.screen.active { display:flex; animation: screenEnter .35s cubic-bezier(.22,1,.36,1) both; }
+.screen.exit { animation: screenExit .25s ease-in both; }
+
+@keyframes screenEnter {
+  from { opacity:0; transform:translateY(18px) scale(.99); }
+  to   { opacity:1; transform:translateY(0)   scale(1); }
+}
+@keyframes screenExit {
+  from { opacity:1; transform:translateY(0); }
+  to   { opacity:0; transform:translateY(-12px); }
+}
+
+/* stagger children */
+.screen.active .stagger > * {
+  opacity:0;
+  animation: itemIn .4s cubic-bezier(.22,1,.36,1) forwards;
+}
+.screen.active .stagger > *:nth-child(1) { animation-delay:.05s }
+.screen.active .stagger > *:nth-child(2) { animation-delay:.12s }
+.screen.active .stagger > *:nth-child(3) { animation-delay:.19s }
+.screen.active .stagger > *:nth-child(4) { animation-delay:.26s }
+.screen.active .stagger > *:nth-child(5) { animation-delay:.33s }
+.screen.active .stagger > *:nth-child(n+6) { animation-delay:.38s }
+@keyframes itemIn {
+  from { opacity:0; transform:translateY(14px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+
+/* ═══════════════════════════════
+   LAYOUT HELPERS
+═══════════════════════════════ */
+.sbody {
+  flex:1; display:flex; flex-direction:column; align-items:center;
+  padding:24px 20px;
+  max-width:480px; margin:0 auto; width:100%;
+}
+.sfooter {
+  padding:12px 20px 24px;
+  max-width:480px; margin:0 auto; width:100%;
+  background:var(--bg);
+}
+.sfooter-nav { padding-bottom:calc(24px + var(--nav-h)); }
+
+.center { text-align:center; align-items:center; }
+.gap-sm { gap:8px; }
+.gap-md { gap:14px; }
+.gap-lg { gap:20px; }
+
+/* ═══════════════════════════════
+   TOPBAR
+═══════════════════════════════ */
+.topbar {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:0 20px;
+  height:var(--top-h);
+  background:var(--bg);
+  border-bottom:1.5px solid var(--border);
+  position:sticky; top:0; z-index:200;
+  max-width:100%;
+}
+.logo {
+  font-family:var(--font-display);
+  font-size:22px; font-weight:400; color:var(--text);
+  letter-spacing:-.3px;
+}
+.logo em { color:var(--accent); font-style:italic; }
+
+.prog-track {
+  flex:1; margin:0 16px; height:3px;
+  background:var(--border); border-radius:100px; overflow:hidden;
+}
+.prog-fill {
+  height:100%; background:var(--accent); border-radius:100px;
+  transition:width .6s cubic-bezier(.22,1,.36,1);
+}
+
+.icon-btn {
+  width:38px; height:38px; border-radius:50%;
+  border:1.5px solid var(--border);
+  background:var(--surface); cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  font-size:16px; transition:all .2s; color:var(--text2);
+}
+.icon-btn:hover { background:var(--surface2); transform:scale(1.05); }
+.icon-btn:active { transform:scale(.94); }
+
+/* ═══════════════════════════════
+   BOTTOM NAV
+═══════════════════════════════ */
+#bottomnav {
+  position:fixed; bottom:0; left:0; right:0; z-index:500;
+  display:none;
+  padding:8px 16px 20px;
+  background:var(--surface);
+  border-top:1.5px solid var(--border);
+}
+#bottomnav.visible { display:flex; justify-content:space-around; align-items:center; }
+.bnav-item {
+  display:flex; flex-direction:column; align-items:center; gap:3px;
+  padding:6px 14px; border-radius:var(--r-lg);
+  cursor:pointer; border:none; background:none;
+  transition:all .2s; flex:1;
+}
+.bnav-item .ni { font-size:22px; transition:transform .2s; }
+.bnav-item .nl { font-size:10px; font-weight:600; color:var(--text3); transition:color .2s; }
+.bnav-item:hover .ni { transform:translateY(-2px); }
+.bnav-item.active { background:var(--accent-light); }
+.bnav-item.active .nl { color:var(--accent); }
+.bnav-item.active .ni { transform:translateY(-2px) scale(1.1); }
+
+/* ═══════════════════════════════
+   BUTTONS
+═══════════════════════════════ */
+.btn {
+  width:100%; padding:16px 24px; border-radius:100px;
+  border:none; cursor:pointer;
+  font-family:var(--font-body); font-size:15px; font-weight:700;
+  letter-spacing:.1px; transition:all .15s;
+  display:flex; align-items:center; justify-content:center; gap:8px;
+}
+.btn:active { transform:scale(.97); }
+
+.btn-primary {
+  background:var(--text); color:#fff;
+  box-shadow:0 4px 16px rgba(17,17,17,.2);
+}
+.btn-primary:hover { background:#222; box-shadow:0 6px 20px rgba(17,17,17,.25); transform:translateY(-1px); }
+.btn-primary:active { transform:scale(.97) translateY(0); }
+.btn-primary:disabled { background:var(--border); color:var(--text3); box-shadow:none; cursor:not-allowed; transform:none; }
+
+.btn-accent {
+  background:var(--accent); color:#fff;
+  box-shadow:0 4px 16px rgba(255,87,51,.3);
+}
+.btn-accent:hover { background:var(--accent-dark); transform:translateY(-1px); box-shadow:0 6px 20px rgba(255,87,51,.35); }
+
+.btn-outline {
+  background:transparent; color:var(--text);
+  border:1.5px solid var(--border);
+}
+.btn-outline:hover { background:var(--surface2); }
+
+.btn-ghost {
+  background:transparent; color:var(--text2);
+  padding:12px 24px; font-weight:600; font-size:14px;
+}
+.btn-ghost:hover { color:var(--text); }
+
+.btn-sm { width:auto; padding:10px 20px; font-size:13px; }
+
+/* ═══════════════════════════════
+   CARDS
+═══════════════════════════════ */
+.card {
+  background:var(--surface); border-radius:var(--r-xl);
+  border:1.5px solid var(--border);
+  padding:20px;
+  width:100%;
+}
+.card-flat {
+  background:var(--surface2); border-radius:var(--r-lg);
+  padding:16px 18px; width:100%;
+}
+
+/* ═══════════════════════════════
+   TYPOGRAPHY
+═══════════════════════════════ */
+.display {
+  font-family:var(--font-display);
+  font-size:38px; font-weight:400;
+  line-height:1.15; letter-spacing:-.5px;
+  color:var(--text);
+}
+.display em { color:var(--blue); font-style:normal; }
+
+.title {
+  font-family:var(--font-display);
+  font-size:26px; font-weight:400; line-height:1.25;
+  color:var(--text); text-align:center;
+}
+.subtitle {
+  font-size:14px; font-weight:500; color:var(--text2);
+  line-height:1.6; text-align:center;
+}
+
+.label {
+  font-size:11px; font-weight:700; text-transform:uppercase;
+  letter-spacing:1.2px; color:var(--text3);
+}
+
+/* ═══════════════════════════════
+   MASCOT / EMOJI
+═══════════════════════════════ */
+.mascot {
+  font-size:72px; text-align:center; display:block;
+  filter:drop-shadow(0 8px 20px rgba(0,0,0,.1));
+  animation:float 4s ease-in-out infinite;
+}
+.mascot-sm { font-size:48px; text-align:center; display:block; }
+@keyframes float {
+  0%,100% { transform:translateY(0); }
+  50%      { transform:translateY(-10px); }
+}
+
+/* ═══════════════════════════════
+   XP RING (SVG animated)
+═══════════════════════════════ */
+.xp-ring-wrap {
+  position:relative; width:90px; height:90px;
+  display:flex; align-items:center; justify-content:center;
+}
+.xp-ring-wrap svg { position:absolute; top:0; left:0; transform:rotate(-90deg); }
+.xp-ring-bg { fill:none; stroke:var(--border); stroke-width:5; }
+.xp-ring-fill {
+  fill:none; stroke:var(--accent); stroke-width:5;
+  stroke-linecap:round;
+  stroke-dasharray:226;
+  stroke-dashoffset:226;
+  transition:stroke-dashoffset 1s cubic-bezier(.22,1,.36,1);
+}
+.xp-inner {
+  display:flex; flex-direction:column; align-items:center; z-index:1;
+}
+.xp-num {
+  font-family:var(--font-display); font-size:22px; font-weight:400; color:var(--text);
+  line-height:1;
+}
+.xp-sub { font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:var(--text3); }
+
+/* XP level-up burst */
+.xp-burst {
+  position:fixed; top:50%; left:50%; z-index:9000;
+  transform:translate(-50%,-50%) scale(0);
+  background:var(--accent); color:#fff;
+  font-family:var(--font-display); font-size:28px;
+  padding:16px 32px; border-radius:100px;
+  pointer-events:none;
+  box-shadow:0 16px 48px rgba(187, 85, 7, 0.4);
+  animation:xpBurst .8s cubic-bezier(.22,1,.36,1) forwards;
+}
+@keyframes xpBurst {
+  0%   { transform:translate(-50%,-50%) scale(0); opacity:1; }
+  40%  { transform:translate(-50%,-55%) scale(1.1); opacity:1; }
+  70%  { transform:translate(-50%,-58%) scale(1); opacity:1; }
+  100% { transform:translate(-50%,-75%) scale(.9); opacity:0; }
+}
+
+/* ═══════════════════════════════
+   UPLOAD ZONE
+═══════════════════════════════ */
+.upload-zone {
+  border:2px dashed var(--border); border-radius:var(--r-xl);
+  padding:44px 24px; text-align:center; cursor:pointer;
+  transition:all .3s; background:var(--surface); width:100%;
+  position:relative; overflow:hidden;
+}
+.upload-zone::before {
+  content:''; position:absolute; inset:0;
+  background:var(--accent-light); opacity:0; transition:opacity .3s;
+}
+.upload-zone:hover::before { opacity:1; }
+.upload-zone:hover { border-color:var(--accent); }
+.upload-zone.hover { border-color:var(--accent); }
+.upload-zone.hover::before { opacity:1; }
+.upload-zone input { display:none; }
+.upload-icon { font-size:40px; display:block; margin-bottom:12px; position:relative; z-index:1; }
+.upload-zone p { font-size:15px; font-weight:700; color:var(--text); position:relative; z-index:1; margin-bottom:4px; }
+.upload-zone small { font-size:12px; color:var(--text3); position:relative; z-index:1; }
+.file-pill {
+  display:inline-flex; align-items:center; gap:6px;
+  background:var(--accent); color:#fff; border-radius:100px;
+  padding:6px 14px; font-size:13px; font-weight:700;
+  margin-top:12px; position:relative; z-index:1;
+}
+
+/* ═══════════════════════════════
+   TOPIC CARDS (module list)
+═══════════════════════════════ */
+.mod-section { width:100%; margin-bottom:10px; }
+.mod-header {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:12px 14px; background:var(--surface); border-radius:var(--r-lg);
+  border:1.5px solid var(--border); cursor:pointer; width:100%;
+  border-left-width:3px; transition:all .2s; font-family:var(--font-body);
+}
+.mod-header:hover { background:var(--surface2); }
+.mod-header-inner { display:flex; align-items:center; gap:10px; }
+.mod-icon { font-size:18px; }
+.mod-name { font-size:14px; font-weight:700; color:var(--text); }
+.mod-count {
+  font-size:11px; font-weight:700; padding:3px 9px;
+  border-radius:100px; background:var(--surface2); color:var(--text2);
+}
+.mod-chev { font-size:11px; color:var(--text3); transition:transform .25s; }
+.mod-header.open .mod-chev { transform:rotate(180deg); }
+
+.mod-topics { display:none; padding:6px 0 6px 10px; }
+.mod-topics.open { display:block; }
+
+.topic-card {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:11px 14px 11px 12px;
+  border-radius:var(--r); cursor:pointer;
+  transition:all .2s; margin-bottom:3px;
+  border:1.5px solid transparent;
+  background:transparent;
+  position:relative; overflow:hidden;
+}
+.topic-card::after {
+  content:'Learn →';
+  position:absolute; right:14px;
+  font-size:12px; font-weight:700; color:var(--accent);
+  opacity:0; transform:translateX(8px);
+  transition:all .2s;
+}
+.topic-card:hover {
+  background:var(--surface);
+  border-color:var(--border);
+  box-shadow:var(--shadow);
+  transform:translateX(4px);
+}
+.topic-card:hover::after { opacity:1; transform:translateX(0); }
+.topic-card:hover .topic-score { opacity:0; }
+.tc-left { display:flex; align-items:center; gap:10px; }
+.tc-dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
+.tc-name { font-size:14px; font-weight:600; color:var(--text2); }
+.topic-score { font-size:12px; font-weight:800; transition:opacity .2s; }
+.ts-done .tc-name { color:var(--text); }
+
+/* ═══════════════════════════════
+   SURVEY / RATING
+═══════════════════════════════ */
+.survey-card {
+  background:var(--surface); border-radius:var(--r-xl);
+  border:1.5px solid var(--border); padding:28px 22px;
+  width:100%; text-align:center;
+}
+.survey-mod-badge {
+  display:inline-block; padding:4px 12px; border-radius:100px;
+  font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.8px;
+  background:var(--surface2); color:var(--text2); margin-bottom:10px;
+}
+.survey-q {
+  font-family:var(--font-display); font-size:22px;
+  color:var(--text); margin-bottom:22px; line-height:1.3;
+}
+
+.rating-row { display:flex; gap:10px; }
+.rcard {
+  flex:1; padding:14px 8px; border-radius:var(--r-lg);
+  border:2px solid var(--border); cursor:pointer;
+  display:flex; flex-direction:column; align-items:center; gap:7px;
+  font-family:var(--font-body); font-size:12px; font-weight:700;
+  background:var(--surface); transition:all .2s; color:var(--text2);
+}
+.rcard .ri { font-size:26px; }
+.rcard:hover { transform:translateY(-4px); box-shadow:var(--shadow-md); }
+.rcard:active { transform:translateY(-2px) scale(.96); }
+.rcard.active-weak  { border-color:var(--red);    background:var(--red-light);    color:var(--red);    }
+.rcard.active-ok    { border-color:var(--yellow);  background:var(--yellow-light); color:#C8870A;       }
+.rcard.active-strong{ border-color:var(--green);   background:var(--green-light);  color:var(--green);  }
+
+/* ═══════════════════════════════
+   LESSON VIEW
+═══════════════════════════════ */
+.lesson-hero {
+  width:100%; padding:26px 22px 22px;
+  position:relative; overflow:hidden;
+}
+.lesson-hero::before {
+  content:''; position:absolute; inset:0;
+  background:var(--hero-color,var(--text));
+  opacity:.06;
+}
+.lesson-eyebrow {
+  font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:1px;
+  color:var(--text3); margin-bottom:8px;
+}
+.lesson-h1 {
+  font-family:var(--font-display); font-size:26px; color:var(--text);
+  line-height:1.25; position:relative; z-index:1;
+}
+.lesson-body-scroll { padding:20px; overflow-y:auto; }
+.sec-label { font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:1.3px; color:var(--text3); margin-bottom:8px; }
+.lesson-prose { font-size:15px; line-height:1.75; color:var(--text2); }
+.kpoint {
+  display:flex; align-items:flex-start; gap:10px;
+  padding:9px 0; border-bottom:1.5px solid var(--border);
+  font-size:14px; color:var(--text2); line-height:1.55;
+}
+.kpoint:last-child { border:none; }
+.k-bullet {
+  width:20px; height:20px; border-radius:50%;
+  background:var(--accent-light); color:var(--accent);
+  font-size:10px; font-weight:800; display:flex; align-items:center;
+  justify-content:center; flex-shrink:0; margin-top:2px;
+}
+.analogy-box {
+  background:var(--yellow-light); border:1.5px solid var(--yellow);
+  border-radius:var(--r-lg); padding:14px;
+  font-size:14px; line-height:1.65; color:var(--text2);
+}
+.example-box {
+  background:#F8F8F8; border:1.5px solid var(--border);
+  border-radius:var(--r-lg); padding:14px;
+  font-size:13px; line-height:1.65; color:var(--text);
+  font-family:'SF Mono','Fira Code',monospace;
+}
+
+/* ═══════════════════════════════
+   QUIZ
+═══════════════════════════════ */
+.quiz-qnum { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:var(--text3); text-align:center; margin-bottom:14px; }
+.quiz-q {
+  font-family:var(--font-display); font-size:22px; color:var(--text);
+  text-align:center; margin-bottom:24px; line-height:1.4;
+}
+.q-options { display:flex; flex-direction:column; gap:10px; width:100%; }
+.qopt {
+  padding:14px 16px; border-radius:var(--r-lg);
+  border:1.5px solid var(--border); background:var(--surface);
+  cursor:pointer; font-family:var(--font-body); font-size:15px; font-weight:600;
+  color:var(--text); text-align:left; transition:all .15s;
+  display:flex; align-items:center; gap:12px; width:100%;
+}
+.q-letter {
+  width:30px; height:30px; border-radius:50%;
+  background:var(--surface2); font-size:12px; font-weight:800;
+  display:flex; align-items:center; justify-content:center; flex-shrink:0;
+  transition:all .15s;
+}
+.qopt:hover:not(:disabled) { border-color:var(--text); background:var(--surface2); transform:translateY(-2px); box-shadow:var(--shadow); }
+.qopt:hover:not(:disabled) .q-letter { background:var(--text); color:#fff; }
+.qopt:active:not(:disabled) { transform:scale(.98); }
+.qopt.selected { border-color:var(--text); background:var(--surface2); }
+.qopt.correct { border-color:var(--green); background:var(--green-light); animation:correctPop .35s cubic-bezier(.22,1,.36,1); }
+.qopt.correct .q-letter { background:var(--green); color:#fff; }
+.qopt.wrong { border-color:var(--red); background:var(--red-light); animation:wrongShake .4s ease; }
+.qopt.wrong .q-letter { background:var(--red); color:#fff; }
+.qopt:disabled { cursor:default; transform:none!important; }
+
+@keyframes correctPop {
+  0% { transform:scale(1); } 40% { transform:scale(1.03); } 100% { transform:scale(1); }
+}
+@keyframes wrongShake {
+  0%,100% { transform:translateX(0); }
+  20%     { transform:translateX(-7px); }
+  40%     { transform:translateX(7px); }
+  60%     { transform:translateX(-5px); }
+  80%     { transform:translateX(5px); }
+}
+
+.ans-banner {
+  border-radius:var(--r-lg); padding:14px 16px;
+  display:flex; align-items:flex-start; gap:12px;
+  margin-top:14px; font-size:14px; font-weight:700;
+  animation:itemIn .35s cubic-bezier(.22,1,.36,1);
+  border:1.5px solid;
+}
+.ans-banner.ok  { background:var(--green-light);  border-color:var(--green); color:var(--green); }
+.ans-banner.no  { background:var(--red-light);    border-color:var(--red);   color:var(--red);   }
+.ab-icon { font-size:22px; flex-shrink:0; }
+.ab-exp  { font-size:12px; font-weight:500; color:var(--text2); margin-top:2px; line-height:1.5; }
+
+/* ═══════════════════════════════
+   SCORE RING (result)
+═══════════════════════════════ */
+.score-wrap {
+  width:130px; height:130px; position:relative;
+  display:flex; align-items:center; justify-content:center;
+  margin:0 auto 22px;
+}
+.score-wrap svg { position:absolute; top:0; left:0; transform:rotate(-90deg); }
+.score-bg  { fill:none; stroke:var(--border); stroke-width:8; }
+.score-arc { fill:none; stroke-width:8; stroke-linecap:round;
+  stroke-dasharray:351; stroke-dashoffset:351;
+  transition:stroke-dashoffset 1.2s cubic-bezier(.22,1,.36,1); }
+.score-inner {
+  display:flex; flex-direction:column; align-items:center; z-index:1;
+}
+.score-num {
+  font-family:var(--font-display); font-size:36px;
+  font-weight:400; line-height:1; color:var(--text);
+}
+.score-lbl { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:var(--text3); }
+
+/* ═══════════════════════════════
+   PLAN CARDS
+═══════════════════════════════ */
+.plan-card {
+  display:flex; align-items:center; gap:14px;
+  padding:14px 16px; background:var(--surface);
+  border-radius:var(--r-lg); border:1.5px solid var(--border);
+  margin-bottom:8px; cursor:pointer; transition:all .2s;
+}
+.plan-card:hover { border-color:var(--text); transform:translateX(3px); }
+.plan-card.today { border-color:var(--accent); box-shadow:0 0 0 1px var(--accent); }
+.plan-card.rev   { border-color:var(--purple); background:var(--purple-light); }
+.day-pill {
+  width:44px; height:44px; border-radius:var(--r); background:var(--surface2);
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  flex-shrink:0;
+}
+.plan-card.today .day-pill { background:var(--accent); color:#fff; }
+.plan-card.rev   .day-pill { background:var(--purple); color:#fff; }
+.dn { font-size:16px; font-weight:800; line-height:1; font-family:var(--font-display); }
+.dw { font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:.5px; opacity:.6; }
+
+/* ═══════════════════════════════
+   FREQ / PAPER RESULTS
+═══════════════════════════════ */
+.freq-row {
+  display:flex; align-items:center; gap:10px;
+  padding:10px 0; border-bottom:1.5px solid var(--border);
+}
+.freq-row:last-child { border:none; }
+.freq-track { flex:1; height:6px; background:var(--border); border-radius:100px; overflow:hidden; }
+.freq-fill  { height:100%; background:var(--accent); border-radius:100px; transition:width .8s cubic-bezier(.22,1,.36,1); }
+
+/* ═══════════════════════════════
+   CHIPS / BADGES
+═══════════════════════════════ */
+.chip {
+  display:inline-flex; align-items:center; gap:5px;
+  padding:5px 12px; border-radius:100px;
+  font-size:12px; font-weight:700;
+  background:var(--surface2); color:var(--text2);
+}
+.chip-accent { background:var(--accent-light); color:var(--accent); }
+.chip-green  { background:var(--green-light);  color:var(--green);  }
+.chip-red    { background:var(--red-light);     color:var(--red);    }
+.chip-yellow { background:var(--yellow-light);  color:#C8870A;       }
+.chip-blue   { background:var(--blue-light);    color:var(--blue);   }
+
+/* ═══════════════════════════════
+   LOADING SPINNER
+═══════════════════════════════ */
+.spinner {
+  width:40px; height:40px; border-radius:50%;
+  border:3.5px solid var(--border); border-top-color:var(--accent);
+  animation:spin .7s linear infinite;
+}
+@keyframes spin { to { transform:rotate(360deg); } }
+.loading-wrap { display:flex; flex-direction:column; align-items:center; justify-content:center; padding:60px 24px; text-align:center; gap:14px; flex:1; }
+.loading-t { font-family:var(--font-display); font-size:20px; color:var(--text); }
+.loading-s { font-size:13px; color:var(--text3); }
+
+/* ═══════════════════════════════
+   FLOATING CHAT
+═══════════════════════════════ */
+#chatFab {
+  position:fixed; bottom:calc(var(--nav-h) + 14px); right:18px; z-index:800;
+  width:52px; height:52px; border-radius:50%;
+  background:var(--text); color:#fff; border:none; cursor:pointer;
+  font-size:22px; display:none; align-items:center; justify-content:center;
+  box-shadow:var(--shadow-lg); transition:all .2s;
+}
+#chatFab:hover { transform:scale(1.08) translateY(-2px); }
+#chatFab:active { transform:scale(.95); }
+#chatFab.visible { display:flex; }
+
+#chatPanel {
+  position:fixed; bottom:0; left:0; right:0; z-index:900;
+  max-width:480px; margin:0 auto;
+  background:var(--surface); border-radius:var(--r-xl) var(--r-xl) 0 0;
+  border:1.5px solid var(--border); border-bottom:none;
+  box-shadow:var(--shadow-lg);
+  display:flex; flex-direction:column;
+  transform:translateY(100%); transition:transform .4s cubic-bezier(.22,1,.36,1);
+  max-height:70vh;
+}
+#chatPanel.open { transform:translateY(0); }
+
+.chat-handle-bar {
+  width:40px; height:4px; background:var(--border); border-radius:100px;
+  margin:12px auto 0;
+}
+.chat-hdr {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:10px 18px 12px;
+  border-bottom:1.5px solid var(--border);
+}
+.chat-title { font-family:var(--font-display); font-size:18px; color:var(--text); }
+.chat-close { background:none; border:none; cursor:pointer; font-size:18px; color:var(--text3); padding:4px; }
+
+.chat-msgs {
+  flex:1; overflow-y:auto; padding:14px;
+  display:flex; flex-direction:column; gap:10px;
+}
+.cb-wrap { display:flex; }
+.cb-wrap.user { justify-content:flex-end; }
+.cbubble {
+  max-width:78%; padding:10px 14px;
+  font-size:14px; line-height:1.55; border-radius:18px;
+}
+.cb-wrap.user .cbubble { background:var(--text); color:#fff; border-radius:18px 18px 4px 18px; }
+.cb-wrap.bot  .cbubble { background:var(--surface2); color:var(--text); border-radius:18px 18px 18px 4px; }
+
+.chat-inp-row {
+  padding:10px 14px 18px; border-top:1.5px solid var(--border);
+  display:flex; gap:8px; align-items:center;
+}
+.chat-input {
+  flex:1; padding:11px 16px; border-radius:100px;
+  border:1.5px solid var(--border); background:var(--bg);
+  font-family:var(--font-body); font-size:14px; outline:none;
+  transition:border-color .2s;
+}
+.chat-input:focus { border-color:var(--text); }
+.chat-send {
+  width:40px; height:40px; border-radius:50%;
+  background:var(--text); color:#fff; border:none; cursor:pointer;
+  font-size:16px; display:flex; align-items:center; justify-content:center;
+  flex-shrink:0; transition:all .2s;
+}
+.chat-send:hover { background:var(--accent); transform:scale(1.06); }
+
+/* backdrop */
+#chatBdrop {
+  display:none; position:fixed; inset:0; z-index:850;
+  background:rgba(0,0,0,.3); backdrop-filter:blur(2px);
+}
+#chatBdrop.visible { display:block; }
+
+/* ═══════════════════════════════
+   PROGRESS STATS GRID
+═══════════════════════════════ */
+.stats-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; width:100%; margin-bottom:20px; }
+.stat-card {
+  background:var(--surface); border:1.5px solid var(--border);
+  border-radius:var(--r-xl); padding:16px 14px; text-align:center;
+}
+.stat-num { font-family:var(--font-display); font-size:32px; line-height:1; margin-bottom:4px; }
+.stat-lbl { font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:1px; color:var(--text3); }
+
+/* ═══════════════════════════════
+   SEARCH INPUT
+═══════════════════════════════ */
+.search-wrap {
+  position:relative; width:100%;
+}
+.search-wrap::before {
+  content:'🔍'; position:absolute; left:14px; top:50%;
+  transform:translateY(-50%); font-size:14px; pointer-events:none;
+}
+.search-input {
+  width:100%; padding:12px 16px 12px 40px;
+  border:1.5px solid var(--border); border-radius:100px;
+  background:var(--surface); font-family:var(--font-body);
+  font-size:14px; outline:none; transition:border-color .2s;
+  color:var(--text);
+}
+.search-input:focus { border-color:var(--text); }
+
+/* ═══════════════════════════════
+   HOME QUICK ACTIONS
+═══════════════════════════════ */
+.action-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; width:100%; }
+.action-card {
+  background:var(--surface); border:1.5px solid var(--border);
+  border-radius:var(--r-xl); padding:20px 16px; text-align:center;
+  cursor:pointer; transition:all .22s; display:flex; flex-direction:column;
+  align-items:center; gap:8px;
+}
+.action-card:hover { transform:translateY(-4px); box-shadow:var(--shadow-md); border-color:var(--text); }
+.action-card:active { transform:translateY(-2px) scale(.97); }
+.action-card.featured { background:var(--text); border-color:var(--text); }
+.action-card.featured .ac-label { color:#fff; }
+.action-card.featured .ac-icon { filter:brightness(10); }
+.ac-icon { font-size:28px; }
+.ac-label { font-size:13px; font-weight:800; color:var(--text); }
+
+/* ═══════════════════════════════
+   TOAST
+═══════════════════════════════ */
+#toast {
+  position:fixed; bottom:90px; left:50%; z-index:9999;
+  transform:translateX(-50%) translateY(20px); opacity:0;
+  background:var(--text); color:#fff; padding:11px 22px;
+  border-radius:100px; font-size:13px; font-weight:700;
+  font-family:var(--font-body); white-space:nowrap;
+  transition:all .3s cubic-bezier(.22,1,.36,1);
+  pointer-events:none;
+}
+#toast.show { transform:translateX(-50%) translateY(0); opacity:1; }
+#toast.success { background:var(--green); }
+#toast.error   { background:var(--red);   }
+
+/* ═══════════════════════════════
+   CONFETTI
+═══════════════════════════════ */
+.cpce {
+  position:fixed; pointer-events:none; z-index:9998;
+  border-radius:2px;
+  animation:cfFall linear forwards;
+}
+@keyframes cfFall {
+  from { transform:translateY(-20px) rotate(0); opacity:1; }
+  to   { transform:translateY(105vh) rotate(720deg); opacity:0; }
+}
+
+/* ═══════════════════════════════
+   DATE INPUT
+═══════════════════════════════ */
+.date-input {
+  width:100%; padding:18px 20px; border:1.5px solid var(--border);
+  border-radius:var(--r-xl); font-family:var(--font-display);
+  font-size:22px; color:var(--text); text-align:center; outline:none;
+  background:var(--surface); cursor:pointer; transition:border-color .2s;
+}
+.date-input:focus { border-color:var(--accent); }
+
+/* ═══════════════════════════════
+   DIVIDER
+═══════════════════════════════ */
+.divider { width:100%; height:1.5px; background:var(--border); }
+
+/* ═══════════════════════════════
+   SCROLL CONTAINER (tall lists)
+═══════════════════════════════ */
+.scroll-list { width:100%; overflow-y:auto; flex:1; }
+.scroll-list-fixed { width:100%; overflow-y:auto; max-height:50vh; }
+
+/* ═══════════════════════════════
+   MISC
+═══════════════════════════════ */
+.w100 { width:100%; }
+.spacer { height:20px; }
+.spacer-sm { height:10px; }
+
+/* Progress bar for topic */
+.tp-track { background:var(--border); border-radius:100px; height:5px; overflow:hidden; margin-top:3px; }
+.tp-fill  { height:100%; border-radius:100px; background:var(--accent); }
+
+</style>
+</head>
+<body>
+<div id="toast"></div>
+
+<!-- ════════════════════════════════════
+     S1: WELCOME
+════════════════════════════════════ -->
+<div class="screen active" id="s-welcome">
+  <div class="sbody center" style="justify-content:center;gap:0;padding-top:60px;">
+    <div class="stagger" style="display:flex;flex-direction:column;align-items:center;gap:0;width:100%;">
+      <span class="mascot">🦚</span>
+      <div style="height:20px;"></div>
+      <h1 class="display" style="text-align:center;">Learn smarter,<br><em>not harder.</em></h1>
+      <div style="height:14px;"></div>
+      <p class="subtitle" style="max-width:280px;">Your AI-powered study companion that adapts to you.</p>
+      <div style="height:36px;"></div>
+      <div style="display:flex;flex-direction:column;gap:10px;width:100%;max-width:320px;">
+        <button class="btn btn-primary" onclick="go('s-upload')">Get Started →</button>
+        <button class="btn btn-ghost" onclick="go('s-home');showNav();showFab()">I've done setup</button>
+      </div>
+      <div style="height:20px;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+     S2: UPLOAD SYLLABUS
+════════════════════════════════════ -->
+<div class="screen" id="s-upload">
+  <div class="topbar">
+    <span class="logo">Mentor<em>AI</em></span>
+    <button class="icon-btn" onclick="go('s-welcome')">✕</button>
+  </div>
+  <div class="sbody center stagger">
+    <span class="mascot-sm">📄</span>
+    <div style="height:8px;"></div>
+    <h2 class="title">Upload your syllabus</h2>
+    <p class="subtitle" style="margin-top:6px;">We'll scan all modules and topics automatically.</p>
+    <div style="height:20px;"></div>
+    <div class="upload-zone" id="sylZone" onclick="document.getElementById('sylFile').click()" ondragover="e=>e.preventDefault()" ondrop="handleDrop(event,'syl')">
+      <input type="file" id="sylFile" accept=".pdf" onchange="onSylFile(this)">
+      <span class="upload-icon">📎</span>
+      <p>Tap to upload PDF</p>
+      <small>Only .pdf files supported</small>
+      <div class="file-pill" id="sylTag" style="display:none;"></div>
+    </div>
+  </div>
+  <div class="sfooter">
+    <button class="btn btn-primary" id="btnSyl" disabled onclick="uploadSyllabus()">Analyze Syllabus</button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+     S3: LOADING
+════════════════════════════════════ -->
+<div class="screen" id="s-loading">
+  <div class="sbody">
+    <div class="loading-wrap">
+      <div class="spinner"></div>
+      <div class="loading-t" id="loadT">Analyzing syllabus…</div>
+      <div class="loading-s" id="loadS">This may take a moment ☕</div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+     S4: SYLLABUS OVERVIEW
+════════════════════════════════════ -->
+<div class="screen" id="s-syl-overview">
+  <div class="topbar">
+    <span class="logo">Mentor<em>AI</em></span>
+    <div class="prog-track"><div class="prog-fill" style="width:20%"></div></div>
+    <button class="icon-btn" onclick="go('s-home')">✕</button>
+  </div>
+  <div class="sbody" style="justify-content:flex-start;padding-top:18px;">
+    <div class="stagger w100" style="display:flex;flex-direction:column;align-items:center;gap:0;">
+      <span class="mascot-sm">✅</span>
+      <h2 class="title" id="sylSubject" style="margin-top:8px;">Your Syllabus</h2>
+      <p class="subtitle" style="margin-top:5px;margin-bottom:16px;">Tap any topic to start learning it now.</p>
+      <div id="sylModules" class="scroll-list-fixed w100"></div>
+    </div>
+  </div>
+  <div class="sfooter">
+    <button class="btn btn-primary" onclick="go('s-survey-intro')">Next: Rate Your Knowledge →</button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+     S5: SURVEY INTRO
+════════════════════════════════════ -->
+<div class="screen" id="s-survey-intro">
+  <div class="topbar">
+    <span class="logo">Mentor<em>AI</em></span>
+    <div class="prog-track"><div class="prog-fill" style="width:30%"></div></div>
+    <button class="icon-btn" onclick="go('s-home')">✕</button>
+  </div>
+  <div class="sbody center stagger" style="justify-content:center;">
+    <span class="mascot">🎯</span>
+    <h2 class="title" style="margin-top:16px;">How well do you know<br>each topic?</h2>
+    <p class="subtitle" style="margin-top:8px;margin-bottom:24px;">We'll prioritize your weakest areas.</p>
+    <div style="display:flex;flex-direction:column;gap:8px;width:100%;">
+      <div style="display:flex;align-items:center;gap:12px;background:var(--red-light);border-radius:var(--r-lg);padding:13px 15px;border:1.5px solid var(--red);">
+        <span style="font-size:22px;">😰</span>
+        <div style="text-align:left;"><div style="font-weight:800;color:var(--red);font-size:14px;">Weak</div><div style="font-size:12px;color:var(--text3);">Needs a lot of practice</div></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;background:var(--yellow-light);border-radius:var(--r-lg);padding:13px 15px;border:1.5px solid var(--yellow);">
+        <span style="font-size:22px;">😐</span>
+        <div style="text-align:left;"><div style="font-weight:800;color:#C8870A;font-size:14px;">OK</div><div style="font-size:12px;color:var(--text3);">Somewhat familiar</div></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;background:var(--green-light);border-radius:var(--r-lg);padding:13px 15px;border:1.5px solid var(--green);">
+        <span style="font-size:22px;">💪</span>
+        <div style="text-align:left;"><div style="font-weight:800;color:var(--green);font-size:14px;">Strong</div><div style="font-size:12px;color:var(--text3);">I've got this covered</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="sfooter">
+    <button class="btn btn-primary" onclick="startSurvey()">Let's Rate Them!</button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+     S6: SURVEY
+════════════════════════════════════ -->
+<div class="screen" id="s-survey">
+  <div class="topbar">
+    <span class="logo">Mentor<em>AI</em></span>
+    <div class="prog-track"><div class="prog-fill" id="survProg" style="width:30%"></div></div>
+    <button class="icon-btn" onclick="go('s-home')">✕</button>
+  </div>
+  <div class="sbody center" style="justify-content:center;">
+    <div style="font-size:12px;font-weight:700;color:var(--text3);margin-bottom:16px;" id="survCount">Topic 1 of 10</div>
+    <div class="survey-card">
+      <div class="survey-mod-badge" id="survMod">Module 1</div>
+      <div class="survey-q" id="survTopic">Topic Name</div>
+      <div class="rating-row">
+        <button class="rcard" id="rb-weak" onclick="rate('Weak')"><span class="ri">😰</span>Weak</button>
+        <button class="rcard" id="rb-ok"   onclick="rate('OK')"><span class="ri">😐</span>OK</button>
+        <button class="rcard" id="rb-strong" onclick="rate('Strong')"><span class="ri">💪</span>Strong</button>
+      </div>
+    </div>
+    <div style="margin-top:16px;">
+      <button class="btn btn-ghost btn-sm" onclick="skipSurv()">Skip this one →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+     S7: EXAM DATE
+════════════════════════════════════ -->
+<div class="screen" id="s-exam-date">
+  <div class="topbar">
+    <span class="logo">Mentor<em>AI</em></span>
+    <div class="prog-track"><div class="prog-fill" style="width:55%"></div></div>
+    <button class="icon-btn" onclick="go('s-home')">✕</button>
+  </div>
+  <div class="sbody center stagger" style="justify-content:center;">
+    <span class="mascot">📅</span>
+    <h2 class="title" style="margin-top:16px;">When is your exam?</h2>
+    <p class="subtitle" style="margin-top:8px;margin-bottom:24px;">We'll build a day-by-day plan around your deadline.</p>
+    <input type="date" class="date-input" id="examDate" oninput="document.getElementById('btnPlan').disabled=!this.value">
+  </div>
+  <div class="sfooter">
+    <button class="btn btn-primary" id="btnPlan" disabled onclick="genPlan()">Build My Study Plan 🗓️</button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+     S8: STUDY PLAN
+════════════════════════════════════ -->
+<div class="screen" id="s-plan">
+  <div class="topbar">
+    <span class="logo">Mentor<em>AI</em></span>
+    <div class="prog-track"><div class="prog-fill" style="width:75%"></div></div>
+    <button class="icon-btn" onclick="go('s-home')">✕</button>
+  </div>
+  <div class="sbody" style="justify-content:flex-start;padding-top:18px;">
+    <div class="stagger w100" style="display:flex;flex-direction:column;align-items:center;">
+      <span class="mascot-sm">🗓️</span>
+      <h2 class="title" style="margin-top:8px;">Your Study Plan</h2>
+      <p class="subtitle" id="planSub" style="margin-top:5px;margin-bottom:16px;">30 days of focused study</p>
+      <div id="planList" class="scroll-list-fixed w100"></div>
+    </div>
+  </div>
+  <div class="sfooter" style="display:flex;gap:10px;">
+    <button class="btn btn-outline" style="flex:1;" onclick="go('s-papers-intro')">Skip</button>
+    <button class="btn btn-primary"  style="flex:2;" onclick="go('s-papers-intro')">Looks Great 🎉</button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+     S9: PAPERS INTRO
+════════════════════════════════════ -->
+<div class="screen" id="s-papers-intro">
+  <div class="topbar">
+    <span class="logo">Mentor<em>AI</em></span>
+    <div class="prog-track"><div class="prog-fill" style="width:85%"></div></div>
+    <button class="icon-btn" onclick="go('s-home')">✕</button>
+  </div>
+  <div class="sbody center stagger" style="justify-content:center;">
+    <span class="mascot">📝</span>
+    <h2 class="title" style="margin-top:16px;">Got past question papers?</h2>
+    <p class="subtitle" style="margin-top:8px;margin-bottom:24px;">Upload them and we'll tell you exactly which topics to focus on for the exam.</p>
+    <div class="card" style="text-align:left;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+        <span style="font-size:20px;">🔍</span>
+        <span style="font-weight:700;font-size:14px;">What you'll get:</span>
+      </div>
+      <div class="kpoint"><div class="k-bullet">1</div><span>Topic frequency analysis</span></div>
+      <div class="kpoint"><div class="k-bullet">2</div><span>High-priority areas to study</span></div>
+      <div class="kpoint" style="border:none;"><div class="k-bullet">3</div><span>Exam pattern insights</span></div>
+    </div>
+  </div>
+  <div class="sfooter" style="display:flex;flex-direction:column;gap:10px;">
+    <button class="btn btn-primary" onclick="go('s-upload-paper')">Upload Past Paper 📎</button>
+    <button class="btn btn-ghost" onclick="finishSetup()">Skip for now</button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+     S10: UPLOAD PAPER
+════════════════════════════════════ -->
+<div class="screen" id="s-upload-paper">
+  <div class="topbar">
+    <span class="logo">Mentor<em>AI</em></span>
+    <div class="prog-track"><div class="prog-fill" style="width:91%"></div></div>
+    <button class="icon-btn" onclick="go('s-home')">✕</button>
+  </div>
+  <div class="sbody center stagger">
+    <span class="mascot-sm">📝</span>
+    <h2 class="title" style="margin-top:8px;">Upload question paper</h2>
+    <p class="subtitle" style="margin-top:5px;margin-bottom:20px;">We'll find the most-asked topics.</p>
+    <div class="upload-zone" onclick="document.getElementById('paperFile').click()">
+      <input type="file" id="paperFile" accept=".pdf" onchange="onPaperFile(this)">
+      <span class="upload-icon">📎</span>
+      <p>Tap to upload PDF</p>
+      <small>Past exam paper</small>
+      <div class="file-pill" id="paperTag" style="display:none;"></div>
+    </div>
+  </div>
+  <div class="sfooter">
+    <button class="btn btn-primary" id="btnPaper" disabled onclick="analyzePaper()">Analyze Paper</button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+     S11: PAPER RESULTS
+════════════════════════════════════ -->
+<div class="screen" id="s-paper-results">
+  <div class="topbar">
+    <span class="logo">Mentor<em>AI</em></span>
+    <div class="prog-track"><div class="prog-fill" style="width:97%"></div></div>
+    <button class="icon-btn" onclick="go('s-home')">✕</button>
+  </div>
+  <div class="sbody" style="justify-content:flex-start;padding-top:18px;">
+    <div class="stagger w100" style="display:flex;flex-direction:column;align-items:center;">
+      <span class="mascot-sm">🔍</span>
+      <h2 class="title" style="margin-top:8px;">Exam Insights</h2>
+      <p class="subtitle" style="margin-top:5px;margin-bottom:16px;">Topics that appear most in this paper</p>
+      <div id="paperRes" class="scroll-list-fixed w100"></div>
+    </div>
+  </div>
+  <div class="sfooter">
+    <button class="btn btn-primary" onclick="finishSetup()">Start Learning! 🚀</button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+     S12: SETUP COMPLETE
+════════════════════════════════════ -->
+<div class="screen" id="s-done">
+  <div class="sbody center stagger" style="justify-content:center;">
+    <span style="font-size:96px;animation:float 3s ease-in-out infinite;display:block;filter:drop-shadow(0 8px 20px rgba(0,0,0,.1));">🎉</span>
+    <h2 class="display" style="text-align:center;margin-top:20px;"><em>You're all set!</em></h2>
+    <p class="subtitle" style="margin-top:10px;">Your personalized study plan is ready. Let's ace that exam!</p>
+    <div style="margin-top:20px;">
+      <div class="chip chip-accent" style="font-size:14px;padding:8px 20px;">⚡ Setup Complete</div>
+    </div>
+  </div>
+  <div class="sfooter">
+    <button class="btn btn-primary" onclick="go('s-home');showNav();showFab();">Go to Dashboard 🏠</button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+     S13: HOME
+════════════════════════════════════ -->
+<div class="screen" id="s-home">
+  <div class="topbar">
+    <span class="logo">Mentor<em>AI</em></span>
+    <div id="homeXpRing" style="cursor:pointer;" onclick="go('s-progress')">
+      <div class="xp-ring-wrap" style="width:44px;height:44px;">
+        <svg width="44" height="44" viewBox="0 0 44 44">
+          <circle class="xp-ring-bg" cx="22" cy="22" r="18"/>
+          <circle class="xp-ring-fill" id="homeRingFill" cx="22" cy="22" r="18"/>
+        </svg>
+        <div class="xp-inner">
+          <span style="font-size:10px;font-weight:800;color:var(--accent);" id="homeXPSmall">0</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="sbody" style="justify-content:flex-start;padding-top:18px;padding-bottom:calc(var(--nav-h)+20px);">
+    <div class="stagger w100" style="display:flex;flex-direction:column;gap:0;">
+      <div style="font-family:var(--font-display);font-size:28px;color:var(--text);margin-bottom:4px;" id="greet">Good morning!</div>
+      <p style="font-size:14px;color:var(--text3);font-weight:500;margin-bottom:22px;">Ready to study? Let's go.</p>
+
+      <div class="action-grid">
+        <div class="action-card featured" onclick="startLearn()">
+          <span class="ac-icon" style="font-size:32px;">🎓</span>
+          <span class="ac-label">Learn</span>
+        </div>
+        <div class="action-card" onclick="startLearn()">
+          <span class="ac-icon">📝</span>
+          <span class="ac-label">Quiz</span>
+        </div>
+        <div class="action-card" onclick="go('s-plan')">
+          <span class="ac-icon">🗓️</span>
+          <span class="ac-label">Study Plan</span>
+        </div>
+        <div class="action-card" onclick="openChat()">
+          <span class="ac-icon">💬</span>
+          <span class="ac-label">Ask AI</span>
+        </div>
+      </div>
+
+      <div style="height:24px;"></div>
+      <div class="label" style="margin-bottom:12px;">Your Topics</div>
+      <div id="homeTopics"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+     S14: PICK TOPIC
+════════════════════════════════════ -->
+<div class="screen" id="s-pick">
+  <div class="topbar">
+    <span class="logo">Mentor<em>AI</em></span>
+    <button class="icon-btn" onclick="go('s-home')">✕</button>
+  </div>
+  <div class="sbody" style="justify-content:flex-start;padding-top:16px;padding-bottom:calc(var(--nav-h)+20px);">
+    <h2 class="title" style="text-align:left;margin-bottom:14px;font-size:22px;">What do you want to learn?</h2>
+    <div class="search-wrap w100" style="margin-bottom:14px;">
+      <input class="search-input" id="srch" placeholder="Search topics…" oninput="filterTopics(this.value)">
+    </div>
+    <div id="pickList" class="scroll-list"></div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+     S15: LESSON
+════════════════════════════════════ -->
+<div class="screen" id="s-lesson">
+  <div class="topbar">
+    <span class="logo">Mentor<em>AI</em></span>
+    <div class="prog-track"><div class="prog-fill" id="lessProg" style="width:0%"></div></div>
+    <button class="icon-btn" onclick="go('s-home')">✕</button>
+  </div>
+  <div id="lessBody" style="flex:1;display:flex;flex-direction:column;overflow-y:auto;">
+    <div class="loading-wrap"><div class="spinner"></div><div class="loading-t">Preparing lesson…</div></div>
+  </div>
+  <div class="sfooter sfooter-nav" id="lessFooter" style="display:none;">
+    <button class="btn btn-accent" onclick="toQuiz()">Take Quiz on This 📝</button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+     S16: QUIZ
+════════════════════════════════════ -->
+<div class="screen" id="s-quiz">
+  <div class="topbar">
+    <span class="logo">Mentor<em>AI</em></span>
+    <div class="prog-track"><div class="prog-fill" id="quizProg" style="width:0%"></div></div>
+    <button class="icon-btn" onclick="quitQuiz()">✕</button>
+  </div>
+  <div id="quizBody" class="sbody">
+    <div class="loading-wrap"><div class="spinner"></div><div class="loading-t">Generating quiz…</div></div>
+  </div>
+  <div class="sfooter" id="quizFooter" style="display:none;">
+    <button class="btn btn-primary" id="btnNext" onclick="nextQ()">Continue</button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+     S17: RESULT
+════════════════════════════════════ -->
+<div class="screen" id="s-result">
+  <div class="topbar">
+    <span class="logo">Mentor<em>AI</em></span>
+    <button class="icon-btn" onclick="go('s-home')">✕</button>
+  </div>
+  <div class="sbody center stagger" style="justify-content:flex-start;padding-top:24px;">
+    <div class="score-wrap">
+      <svg width="130" height="130" viewBox="0 0 130 130">
+        <circle class="score-bg"  cx="65" cy="65" r="56"/>
+        <circle class="score-arc" id="scoreArc" cx="65" cy="65" r="56"/>
+      </svg>
+      <div class="score-inner">
+        <span class="score-num" id="snum">—</span>
+        <span class="score-lbl">Score</span>
+      </div>
+    </div>
+    <h2 class="title" id="stitle2" style="margin-bottom:6px;">Nice work!</h2>
+    <p class="subtitle" id="ssub2">You got 4/5 correct</p>
+    <div id="sxp" style="display:none;margin:10px 0;">
+      <div class="chip chip-accent" style="font-size:14px;padding:8px 20px;" id="sxpChip">⚡ +50 XP</div>
+    </div>
+    <div id="sdetail" style="width:100%;text-align:left;margin-top:8px;overflow-y:auto;max-height:200px;"></div>
+  </div>
+  <div class="sfooter sfooter-nav" id="sacts">
+    <button class="btn btn-primary" onclick="go('s-home')">Continue</button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+     S18: RETEACH
+════════════════════════════════════ -->
+<div class="screen" id="s-reteach">
+  <div class="topbar">
+    <span class="logo">Mentor<em>AI</em></span>
+    <div class="prog-track"><div class="prog-fill" style="width:50%"></div></div>
+    <button class="icon-btn" onclick="go('s-home')">✕</button>
+  </div>
+  <div id="reteachBody" style="flex:1;display:flex;flex-direction:column;overflow-y:auto;">
+    <div class="loading-wrap"><div class="spinner"></div><div class="loading-t">Finding a better explanation…</div></div>
+  </div>
+  <div class="sfooter sfooter-nav" id="reteachFooter" style="display:none;">
+    <button class="btn btn-accent" onclick="toQuiz()">Try Quiz Again 🔄</button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+     S19: PROGRESS
+════════════════════════════════════ -->
+<div class="screen" id="s-progress">
+  <div class="topbar">
+    <span class="logo">Mentor<em>AI</em></span>
+    <button class="icon-btn" onclick="go('s-home')">✕</button>
+  </div>
+  <div class="sbody" style="justify-content:flex-start;padding-top:18px;padding-bottom:calc(var(--nav-h)+20px);">
+    <div class="stagger w100" style="display:flex;flex-direction:column;align-items:center;">
+      <h2 class="title" style="text-align:left;width:100%;margin-bottom:16px;">Progress</h2>
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-num" style="color:var(--green);" id="pc1">—</div><div class="stat-lbl">Completed</div></div>
+        <div class="stat-card"><div class="stat-num" style="color:var(--red);"   id="pc2">—</div><div class="stat-lbl">Need Review</div></div>
+        <div class="stat-card"><div class="stat-num" style="color:var(--blue);"  id="pc3">—</div><div class="stat-lbl">Avg Score</div></div>
+        <div class="stat-card"><div class="stat-num" style="color:var(--accent);" id="pc4">0</div><div class="stat-lbl">XP Earned</div></div>
+      </div>
+      <div class="label w100" style="margin-bottom:12px;">All Topics</div>
+      <div id="progList" class="w100" style="overflow-y:auto;max-height:42vh;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+     BOTTOM NAV
+════════════════════════════════════ -->
+<nav id="bottomnav">
+  <button class="bnav-item active" id="bn-home" onclick="bnav('home')">
+    <span class="ni">🏠</span><span class="nl">Home</span>
+  </button>
+  <button class="bnav-item" id="bn-learn" onclick="bnav('learn')">
+    <span class="ni">🎓</span><span class="nl">Learn</span>
+  </button>
+  <button class="bnav-item" id="bn-plan" onclick="bnav('plan')">
+    <span class="ni">🗓️</span><span class="nl">Plan</span>
+  </button>
+  <button class="bnav-item" id="bn-progress" onclick="bnav('progress')">
+    <span class="ni">📊</span><span class="nl">Progress</span>
+  </button>
+</nav>
+
+<!-- ════════════════════════════════════
+     FLOATING CHAT FAB
+════════════════════════════════════ -->
+<button id="chatFab" onclick="toggleChat()" title="Ask AI">💬</button>
+
+<!-- Chat panel -->
+<div id="chatBdrop" onclick="closeChat()"></div>
+<div id="chatPanel">
+  <div class="chat-handle-bar"></div>
+  <div class="chat-hdr">
+    <span class="chat-title">Ask AI</span>
+    <button class="chat-close" onclick="closeChat()">✕</button>
+  </div>
+  <div class="chat-msgs" id="chatMsgs">
+    <div class="cb-wrap bot">
+      <div class="cbubble">Hey! 👋 I'm your AI Mentor. Ask me anything about your topics!</div>
+    </div>
+  </div>
+  <div class="chat-inp-row">
+    <input class="chat-input" id="chatIn" placeholder="Ask anything…" onkeydown="if(event.key==='Enter')sendChat()">
+    <button class="chat-send" onclick="sendChat()">➤</button>
+  </div>
+</div>
+
+<script>
+/* ══════════════════════════════
+   STATE
+══════════════════════════════ */
+const API = 'http://127.0.0.1:8000';
+const ST = {
+  syllabus:null, topics:[],
+  survTopics:[], survIdx:0, survRatings:{},
+  plan:null,
+  xp: parseInt(localStorage.getItem('mxp')||'0'),
+  chatHist:[],
+  curTopic:null, curLesson:null,
+  curQuiz:null, quizIdx:0, quizAnss:[],
+};
+const MOD_COLORS = ['--m0','--m1','--m2','--m3','--m4','--m5'];
+
+/* ══════════════════════════════
+   NAV & SCREEN
+══════════════════════════════ */
+function go(id){
+  document.querySelectorAll('.screen').forEach(s=>{
+    if(s.classList.contains('active')){ s.classList.remove('active'); }
+  });
+  const el = document.getElementById(id);
+  el.classList.add('active');
+  window.scrollTo(0,0);
+  if(id==='s-home')     { loadHome();     updateBnav('home'); }
+  if(id==='s-pick')     { updateBnav('learn'); }
+  if(id==='s-plan')     { updateBnav('plan'); }
+  if(id==='s-progress') { loadProgress(); updateBnav('progress'); }
+}
+
+function showNav(){ document.getElementById('bottomnav').classList.add('visible'); }
+function hideNav(){ document.getElementById('bottomnav').classList.remove('visible'); }
+function showFab(){ document.getElementById('chatFab').classList.add('visible'); }
+function hideFab(){ document.getElementById('chatFab').classList.remove('visible'); }
+
+function updateBnav(tab){
+  document.querySelectorAll('.bnav-item').forEach(b=>b.classList.remove('active'));
+  const el = document.getElementById('bn-'+tab);
+  if(el) el.classList.add('active');
+}
+function bnav(tab){
+  updateBnav(tab);
+  if(tab==='home')     go('s-home');
+  if(tab==='learn')    startLearn();
+  if(tab==='plan')     go('s-plan');
+  if(tab==='progress') go('s-progress');
+}
+
+/* ══════════════════════════════
+   TOAST
+══════════════════════════════ */
+function toast(m, t=''){
+  const el = document.getElementById('toast');
+  el.textContent=m; el.className='show '+t;
+  clearTimeout(el._t);
+  el._t = setTimeout(()=>el.className='', 3000);
+}
+
+/* ══════════════════════════════
+   API
+══════════════════════════════ */
+async function api(method, path, body=null){
+  const o = {method, headers:{}};
+  if(body instanceof FormData) o.body = body;
+  else if(body){ o.headers['Content-Type']='application/json'; o.body=JSON.stringify(body); }
+  const r = await fetch(API+path, o);
+  if(!r.ok){ const e=await r.json().catch(()=>({detail:r.statusText})); throw new Error(e.detail||'Request failed'); }
+  return r.json();
+}
+
+/* ══════════════════════════════
+   CONFETTI
+══════════════════════════════ */
+function confetti(){
+  const cols=['#FF5733','#00B894','#3867D6','#8854D0','#F6B93B','#E84545'];
+  for(let i=0;i<60;i++){
+    const el=document.createElement('div'); el.className='cpce';
+    const sz = 6+Math.random()*8;
+    el.style.cssText=`left:${Math.random()*100}vw;top:-20px;width:${sz}px;height:${sz}px;background:${cols[Math.floor(Math.random()*6)]};border-radius:${Math.random()>.5?'50%':'3px'};animation-duration:${2.2+Math.random()*2}s;animation-delay:${Math.random()*.6}s;`;
+    document.body.appendChild(el);
+    setTimeout(()=>el.remove(), 5000);
+  }
+}
+
+/* ══════════════════════════════
+   XP
+══════════════════════════════ */
+function addXP(n){
+  ST.xp += n;
+  localStorage.setItem('mxp', ST.xp);
+  animateXPBurst(n);
+  updateXPRing();
+}
+function animateXPBurst(n){
+  const el = document.createElement('div');
+  el.className = 'xp-burst';
+  el.textContent = `⚡ +${n} XP`;
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(), 900);
+}
+function updateXPRing(){
+  const lvl = Math.floor(ST.xp / 200);
+  const pct = (ST.xp % 200) / 200;
+  const circ = 113; // 2π×18
+  const fill = document.getElementById('homeRingFill');
+  if(fill) fill.style.strokeDashoffset = circ - pct*circ;
+  const num = document.getElementById('homeXPSmall');
+  if(num) num.textContent = ST.xp > 999 ? Math.floor(ST.xp/1000)+'k' : ST.xp;
+}
+
+/* ══════════════════════════════
+   UPLOAD - SYLLABUS
+══════════════════════════════ */
+let sylF = null;
+function onSylFile(inp){
+  sylF = inp.files[0];
+  const t = document.getElementById('sylTag');
+  t.innerHTML = '📎 '+sylF.name; t.style.display='inline-flex';
+  document.getElementById('btnSyl').disabled = false;
+}
+function handleDrop(e, type){
+  e.preventDefault();
+  const file = e.dataTransfer.files[0];
+  if(!file) return;
+  if(type==='syl'){
+    sylF = file;
+    const t = document.getElementById('sylTag');
+    t.innerHTML='📎 '+file.name; t.style.display='inline-flex';
+    document.getElementById('btnSyl').disabled=false;
+  }
+}
+async function uploadSyllabus(){
+  if(!sylF) return;
+  go('s-loading');
+  try{
+    const fd = new FormData(); fd.append('file', sylF);
+    const d = await api('POST','/analyze-syllabus', fd);
+    ST.syllabus = d; ST.topics = [];
+    (d.modules||[]).forEach(m=>(m.topics||[]).forEach(t=>{
+      const name = typeof t==='string'?t:t.topic;
+      ST.topics.push({module:m.module_name, topic:name, key:`${m.module_name} > ${name}`});
+    }));
+    renderSylOverview(d); go('s-syl-overview');
+  }catch(e){ toast(e.message,'error'); go('s-upload'); }
+}
+function renderSylOverview(d){
+  document.getElementById('sylSubject').textContent = d.subject||'Your Syllabus';
+  const el = document.getElementById('sylModules'); el.innerHTML='';
+  (d.modules||[]).forEach((m,mi)=>{
+    const col = `var(${MOD_COLORS[mi%6]})`;
+    const div = document.createElement('div'); div.className='mod-section';
+    div.innerHTML=`
+      <button class="mod-header" style="border-left-color:${col}" onclick="togMod(this,'ml${mi}')">
+        <div class="mod-header-inner"><span class="mod-icon">📦</span><span class="mod-name">${m.module_name}</span></div>
+        <div style="display:flex;align-items:center;gap:8px;"><span class="mod-count">${(m.topics||[]).length}</span><span class="mod-chev">▼</span></div>
+      </button>
+      <div class="mod-topics" id="ml${mi}">
+        ${(m.topics||[]).map(t=>{const n=typeof t==='string'?t:t.topic;return`<div class="topic-card" onclick="quickLearn('${n.replace(/'/g,"\\'")}')"><div class="tc-left"><div class="tc-dot" style="background:${col}"></div><span class="tc-name">${n}</span></div></div>`;}).join('')}
+      </div>`;
+    el.appendChild(div);
+  });
+}
+function togMod(btn, id){
+  btn.classList.toggle('open');
+  document.getElementById(id).classList.toggle('open');
+}
+
+/* ══════════════════════════════
+   SURVEY
+══════════════════════════════ */
+async function startSurvey(){
+  try{
+    const d = await api('GET','/survey/topics');
+    ST.survTopics = d.topics||[]; ST.survIdx=0; ST.survRatings={};
+    if(!ST.survTopics.length){ go('s-exam-date'); return; }
+    renderSurv(); go('s-survey');
+  }catch(e){ toast(e.message,'error'); }
+}
+function renderSurv(){
+  const t=ST.survTopics[ST.survIdx], total=ST.survTopics.length;
+  const pct=30+(ST.survIdx/total*25);
+  document.getElementById('survProg').style.width=pct+'%';
+  document.getElementById('survCount').textContent=`Topic ${ST.survIdx+1} of ${total}`;
+  document.getElementById('survMod').textContent=t.module;
+  document.getElementById('survTopic').textContent=t.topic;
+  ['weak','ok','strong'].forEach(r=>document.getElementById('rb-'+r).className='rcard');
+}
+function rate(v){
+  ST.survRatings[ST.survTopics[ST.survIdx].key]=v;
+  const map={Weak:'weak',OK:'ok',Strong:'strong'};
+  const cls={Weak:'active-weak',OK:'active-ok',Strong:'active-strong'};
+  document.getElementById('rb-'+map[v]).className='rcard '+cls[v];
+  setTimeout(()=>advSurv(), 340);
+}
+function skipSurv(){ advSurv(); }
+function advSurv(){
+  ST.survIdx++;
+  if(ST.survIdx>=ST.survTopics.length) submitSurv();
+  else renderSurv();
+}
+async function submitSurv(){
+  try{
+    if(Object.keys(ST.survRatings).length>0)
+      await api('POST','/survey/submit',{ratings:ST.survRatings});
+    toast('Survey saved ✓','success'); go('s-exam-date');
+  }catch(e){ go('s-exam-date'); }
+}
+
+/* ══════════════════════════════
+   STUDY PLAN
+══════════════════════════════ */
+async function genPlan(){
+  const dv = document.getElementById('examDate').value;
+  if(!dv) return;
+  const btn = document.getElementById('btnPlan');
+  btn.textContent='Building…'; btn.disabled=true;
+  go('s-loading');
+  document.getElementById('loadT').textContent='Building your study plan…';
+  try{
+    const d = await api('POST','/study-plan/generate',{exam_date:dv});
+    ST.plan=d; renderPlan(d); go('s-plan');
+  }catch(e){ toast(e.message,'error'); go('s-exam-date'); }
+  finally{ btn.textContent='Build My Study Plan 🗓️'; btn.disabled=false; }
+}
+function renderPlan(d){
+  const plan=d.plan||[];
+  document.getElementById('planSub').textContent=`${d.days_left} days until your exam · ${plan.length} study sessions`;
+  const el=document.getElementById('planList'); el.innerHTML='';
+  plan.slice(0,30).forEach((day,i)=>{
+    const rev=day.type==='revision', tod=i===0;
+    const c=document.createElement('div');
+    c.className=`plan-card ${rev?'rev':''} ${tod?'today':''}`;
+    c.innerHTML=`
+      <div class="day-pill"><span class="dn">${day.day}</span><span class="dw">Day</span></div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-weight:800;font-size:14px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${rev?'🔄 Revision':'📚 '+(day.focus||'')}</div>
+        <div style="font-size:12px;color:var(--text3);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${(day.topics||[]).slice(0,3).join(' · ')}</div>
+      </div>
+      ${tod?'<span class="chip chip-accent">Today</span>':''}`;
+    el.appendChild(c);
+  });
+}
+
+/* ══════════════════════════════
+   QUESTION PAPER
+══════════════════════════════ */
+let paperF=null;
+function onPaperFile(inp){
+  paperF=inp.files[0];
+  const t=document.getElementById('paperTag');
+  t.innerHTML='📎 '+paperF.name; t.style.display='inline-flex';
+  document.getElementById('btnPaper').disabled=false;
+}
+async function analyzePaper(){
+  if(!paperF) return;
+  const btn=document.getElementById('btnPaper');
+  btn.textContent='Analyzing…'; btn.disabled=true;
+  go('s-loading'); document.getElementById('loadT').textContent='Analyzing question paper…';
+  try{
+    const fd=new FormData(); fd.append('file',paperF);
+    const d=await api('POST','/analyze-question-paper',fd);
+    renderPaperRes(d); go('s-paper-results');
+  }catch(e){ toast(e.message,'error'); go('s-upload-paper'); }
+  finally{ btn.textContent='Analyze Paper'; btn.disabled=false; }
+}
+function renderPaperRes(d){
+  const topics=d.high_frequency_topics||[];
+  const maxT=Math.max(...topics.map(t=>t.times_asked||1),1);
+  const el=document.getElementById('paperRes');
+  el.innerHTML=`
+    <div class="card" style="margin-bottom:12px;">
+      <div style="display:flex;gap:0;justify-content:space-around;text-align:center;">
+        <div><div style="font-family:var(--font-display);font-size:32px;color:var(--accent)">${d.total_questions_found||0}</div><div class="label">Questions</div></div>
+        <div style="width:1.5px;background:var(--border);"></div>
+        <div><div style="font-family:var(--font-display);font-size:32px;color:var(--blue)">${topics.length}</div><div class="label">Key Topics</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div style="font-weight:800;font-size:14px;margin-bottom:14px;">Most Asked Topics</div>
+      ${topics.map(t=>`
+        <div class="freq-row">
+          <div style="font-size:13px;font-weight:600;width:110px;flex-shrink:0;color:var(--text2);">${t.topic}</div>
+          <div class="freq-track"><div class="freq-fill" style="width:${(t.times_asked/maxT)*100}%"></div></div>
+          <div style="font-size:12px;font-weight:800;color:var(--accent);width:22px;text-align:right;">${t.times_asked}×</div>
+        </div>`).join('')}
+    </div>
+    ${d.insights?`<div class="card-flat" style="margin-top:10px;font-size:13px;color:var(--text2);line-height:1.65;">💡 ${d.insights}</div>`:''}`;
+}
+function finishSetup(){ confetti(); go('s-done'); addXP(100); }
+
+/* ══════════════════════════════
+   HOME
+══════════════════════════════ */
+function loadHome(){
+  const h=new Date().getHours();
+  document.getElementById('greet').textContent=
+    h<12?'Good morning! 👋':h<17?'Good afternoon! ☀️':'Good evening! 🌙';
+  updateXPRing();
+  loadHomeTopics();
+}
+async function loadHomeTopics(){
+  const el=document.getElementById('homeTopics');
+  if(!ST.topics.length){
+    el.innerHTML=`<div style="text-align:center;padding:32px 20px;border:1.5px dashed var(--border);border-radius:var(--r-xl);">
+      <div style="font-size:36px;margin-bottom:10px;">📄</div>
+      <div style="font-family:var(--font-display);font-size:18px;margin-bottom:8px;">No syllabus yet</div>
+      <button class="btn btn-primary btn-sm" onclick="go('s-upload')">Upload Syllabus</button>
+    </div>`; return;
+  }
+  let pmap={};
+  try{ const d=await api('GET','/progress'); (d.progress||[]).forEach(p=>pmap[p.topic]=p); }catch{}
+  const icons={completed:'✅',needs_reteach:'🔴',in_progress:'🟡',not_started:'⭕'};
+  // Group by module
+  const byMod={};
+  ST.topics.slice(0,25).forEach(t=>{ if(!byMod[t.module])byMod[t.module]=[]; byMod[t.module].push(t); });
+  el.innerHTML=Object.entries(byMod).map(([mod,ts],mi)=>{
+    const col=`var(${MOD_COLORS[mi%6]})`;
+    return`<div class="mod-section">
+      <button class="mod-header open" style="border-left-color:${col}" onclick="togMod(this,'hm${mi}')">
+        <div class="mod-header-inner"><span class="mod-icon">📦</span><span class="mod-name">${mod}</span></div>
+        <div style="display:flex;align-items:center;gap:8px;"><span class="mod-count">${ts.length}</span><span class="mod-chev">▼</span></div>
+      </button>
+      <div class="mod-topics open" id="hm${mi}">
+        ${ts.map(t=>{
+          const p=pmap[t.key]||pmap[t.topic]||{};
+          const statusCls=p.status==='completed'?'ts-done':'';
+          return`<div class="topic-card ${statusCls}" onclick="quickLearn('${t.topic.replace(/'/g,"\\'")}')">
+            <div class="tc-left"><div class="tc-dot" style="background:${col}"></div><span class="tc-name">${t.topic}</span></div>
+            <span class="topic-score" style="color:${p.last_score>=70?'var(--green)':'p.last_score!=null?var(--red)':''}">${p.last_score!=null?p.last_score+'%':(icons[p.status]||'⭕')}</span>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ══════════════════════════════
+   PICK TOPIC
+══════════════════════════════ */
+function startLearn(){
+  if(!ST.topics.length){ toast('Upload a syllabus first!','error'); go('s-upload'); return; }
+  renderPickList('');
+  go('s-pick');
+  setTimeout(()=>document.getElementById('srch').focus(), 400);
+}
+function filterTopics(v){ renderPickList(v); }
+function renderPickList(q=''){
+  const el=document.getElementById('pickList');
+  const filtered=q?ST.topics.filter(t=>t.topic.toLowerCase().includes(q.toLowerCase())):ST.topics;
+  if(!filtered.length){ el.innerHTML=`<div style="text-align:center;padding:32px;color:var(--text3);">No topics found</div>`; return; }
+  const byMod={};
+  filtered.forEach(t=>{ if(!byMod[t.module])byMod[t.module]=[]; byMod[t.module].push(t); });
+  el.innerHTML=Object.entries(byMod).map(([mod,ts],mi)=>{
+    const col=`var(${MOD_COLORS[mi%6]})`;
+    return`<div class="mod-section">
+      <button class="mod-header open" style="border-left-color:${col}" onclick="togMod(this,'pk${mi}')">
+        <div class="mod-header-inner"><span class="mod-icon">📦</span><span class="mod-name">${mod}</span></div>
+        <div style="display:flex;align-items:center;gap:8px;"><span class="mod-count">${ts.length}</span><span class="mod-chev">▼</span></div>
+      </button>
+      <div class="mod-topics open" id="pk${mi}">
+        ${ts.map(t=>`<div class="topic-card" onclick="quickLearn('${t.topic.replace(/'/g,"\\'")}')">
+          <div class="tc-left"><div class="tc-dot" style="background:${col}"></div><span class="tc-name">${t.topic}</span></div>
+        </div>`).join('')}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ══════════════════════════════
+   LESSON
+══════════════════════════════ */
+async function quickLearn(topic){
+  ST.curTopic=topic;
+  go('s-lesson');
+  document.getElementById('lessFooter').style.display='none';
+  document.getElementById('lessProg').style.width='30%';
+  showNav(); showFab();
+  try{
+    const d=await api('POST','/teach-topic',{topic});
+    ST.curLesson=d;
+    renderLesson(d);
+    document.getElementById('lessProg').style.width='100%';
+    document.getElementById('lessFooter').style.display='block';
+  }catch(e){
+    document.getElementById('lessBody').innerHTML=`<div class="loading-wrap"><div style="font-size:44px;">😕</div><div class="loading-t">Couldn't load lesson</div><div class="loading-s">${e.message}</div></div>`;
+  }
+}
+function renderLesson(d){
+  const modIdx=ST.topics.findIndex(t=>t.topic===d.title||t.topic===ST.curTopic);
+  const col=modIdx>=0?`var(${MOD_COLORS[modIdx%6]})`:'var(--accent)';
+  document.getElementById('lessBody').innerHTML=`
+    <div class="lesson-hero" style="--hero-color:${col};border-bottom:1.5px solid var(--border);">
+      <div class="lesson-eyebrow">📖 Lesson</div>
+      <div class="lesson-h1">${d.title}</div>
+    </div>
+    <div class="lesson-body-scroll" style="flex:1;overflow-y:auto;max-height:calc(100vh - 280px);">
+      <div style="margin-bottom:20px;">
+        <div class="sec-label" style="margin-bottom:10px;">Explanation</div>
+        <div class="lesson-prose">${d.explanation}</div>
+      </div>
+      <div class="divider" style="margin-bottom:20px;"></div>
+      <div style="margin-bottom:20px;">
+        <div class="sec-label" style="margin-bottom:10px;">Key Points</div>
+        ${(d.key_points||[]).map((p,i)=>`<div class="kpoint"><div class="k-bullet">${i+1}</div><span>${p}</span></div>`).join('')}
+      </div>
+      ${d.analogy?`<div class="divider" style="margin-bottom:20px;"></div><div style="margin-bottom:20px;"><div class="sec-label" style="margin-bottom:10px;">Remember it as</div><div class="analogy-box">💡 ${d.analogy}</div></div>`:''}
+      ${d.example?`<div class="divider" style="margin-bottom:20px;"></div><div style="margin-bottom:20px;"><div class="sec-label" style="margin-bottom:10px;">Example</div><div class="example-box">${d.example}</div></div>`:''}
+      <div style="height:30px;"></div>
+    </div>`;
+}
+
+/* ══════════════════════════════
+   QUIZ
+══════════════════════════════ */
+async function toQuiz(){
+  if(!ST.curTopic) return;
+  go('s-quiz'); ST.quizIdx=0; ST.quizAnss=[];
+  document.getElementById('quizFooter').style.display='none';
+  try{
+    const d=await api('POST','/generate-quiz',{topic:ST.curTopic,num_questions:5});
+    ST.curQuiz=d; renderQ();
+  }catch(e){
+    document.getElementById('quizBody').innerHTML=`<div class="loading-wrap"><div style="font-size:44px;">😕</div><div class="loading-t">${e.message}</div></div>`;
+  }
+}
+function renderQ(){
+  const q=ST.curQuiz.questions[ST.quizIdx], total=ST.curQuiz.questions.length;
+  document.getElementById('quizProg').style.width=((ST.quizIdx/total)*100)+'%';
+  document.getElementById('quizFooter').style.display='none';
+  const letters=['A','B','C','D'];
+  document.getElementById('quizBody').innerHTML=`
+    <div style="width:100%;">
+      <div class="quiz-qnum">Question ${ST.quizIdx+1} of ${total}</div>
+      <div class="quiz-q">${q.question}</div>
+      <div class="q-options">
+        ${(q.options||[]).map((o,i)=>`
+          <button class="qopt" id="o${i}" onclick="pickAns(${i},'${letters[i]}')">
+            <span class="q-letter">${letters[i]}</span>
+            <span>${o.replace(/^[A-D]\.\s*/,'')}</span>
+          </button>`).join('')}
+      </div>
+      <div id="abanner"></div>
+    </div>`;
+}
+function pickAns(oi, letter){
+  document.querySelectorAll('.qopt').forEach(b=>b.disabled=true);
+  const q=ST.curQuiz.questions[ST.quizIdx];
+  const ok=letter===q.correct_answer;
+  ST.quizAnss.push(letter);
+  const ltrs=['A','B','C','D'];
+  ltrs.forEach((l,i)=>{
+    const b=document.getElementById('o'+i);
+    if(l===q.correct_answer) b.classList.add('correct');
+    else if(i===oi&&!ok) b.classList.add('wrong');
+  });
+  document.getElementById('abanner').innerHTML=`
+    <div class="ans-banner ${ok?'ok':'no'}">
+      <span class="ab-icon">${ok?'🎉':'💔'}</span>
+      <div><div>${ok?'Correct!':'Incorrect'}</div><div class="ab-exp">${q.explanation||''}</div></div>
+    </div>`;
+  document.getElementById('quizFooter').style.display='block';
+  const last=ST.quizIdx===ST.curQuiz.questions.length-1;
+  document.getElementById('btnNext').textContent=last?'See Results 🏁':'Next Question →';
+}
+function nextQ(){
+  ST.quizIdx++;
+  if(ST.quizIdx>=ST.curQuiz.questions.length) submitQuiz();
+  else renderQ();
+}
+function quitQuiz(){ if(confirm('Quit quiz?')) go('s-home'); }
+
+async function submitQuiz(){
+  go('s-result');
+  document.getElementById('sdetail').innerHTML='';
+  document.getElementById('sxp').style.display='none';
+  // Animate arc to 0 first
+  document.getElementById('scoreArc').style.strokeDashoffset=351;
+  try{
+    const d=await api('POST','/quiz/evaluate',{topic:ST.curTopic,questions:ST.curQuiz.questions,student_answers:ST.quizAnss});
+    const ok=d.passed;
+    const arc=document.getElementById('scoreArc');
+    arc.style.stroke=ok?'var(--green)':'var(--red)';
+    setTimeout(()=>arc.style.strokeDashoffset=351-(d.score/100)*351, 100);
+    document.getElementById('snum').textContent=d.score+'%';
+    document.getElementById('stitle2').textContent=ok?'🎉 Awesome!':'😤 Keep going!';
+    document.getElementById('ssub2').textContent=`You got ${d.correct}/${d.total} correct`;
+    if(ok){
+      const xg=50+Math.floor(d.score/10)*5; addXP(xg);
+      document.getElementById('sxpChip').textContent=`⚡ +${xg} XP`;
+      document.getElementById('sxp').style.display='block';
+      setTimeout(confetti, 300);
+    }
+    document.getElementById('sdetail').innerHTML=(d.results||[]).map(r=>`
+      <div style="display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1.5px solid var(--border);">
+        <span style="font-size:16px;flex-shrink:0;">${r.is_correct?'✅':'❌'}</span>
+        <div>
+          <div style="font-size:13px;font-weight:600;color:var(--text2);">${r.question}</div>
+          ${!r.is_correct?`<div style="font-size:12px;color:var(--red);margin-top:2px;">Your: ${r.your_answer} · Correct: ${r.correct_answer}</div>`:''}
+        </div>
+      </div>`).join('');
+    document.getElementById('sacts').innerHTML=ok?`
+      <button class="btn btn-primary" onclick="go('s-home')">Continue 🚀</button>
+      <button class="btn btn-outline" style="margin-top:8px;" onclick="toQuiz()">Try Again</button>`:
+      `<button class="btn btn-accent" onclick="doReteach()">Explain it differently 🔄</button>
+       <button class="btn btn-ghost" style="margin-top:8px;" onclick="go('s-home')">Skip for now</button>`;
+  }catch(e){ toast(e.message,'error'); }
+}
+
+/* ══════════════════════════════
+   RETEACH
+══════════════════════════════ */
+async function doReteach(){
+  go('s-reteach');
+  document.getElementById('reteachFooter').style.display='none';
+  try{
+    const d=await api('POST','/reteach-topic',{topic:ST.curTopic});
+    renderReteach(d);
+    document.getElementById('reteachFooter').style.display='block';
+  }catch(e){
+    document.getElementById('reteachBody').innerHTML=`<div class="loading-wrap"><div style="font-size:44px;">😕</div><div class="loading-t">${e.message}</div></div>`;
+  }
+}
+function renderReteach(d){
+  document.getElementById('reteachBody').innerHTML=`
+    <div style="background:var(--red-light);border-bottom:1.5px solid var(--border);padding:22px 20px;">
+      <div class="lesson-eyebrow" style="color:var(--red);">🔄 Attempt #${d.attempt_number}</div>
+      <div class="lesson-h1">${d.title}</div>
+    </div>
+    <div style="padding:20px;flex:1;overflow-y:auto;max-height:calc(100vh - 280px);">
+      ${d.reteach_note?`<div style="background:var(--red-light);border:1.5px solid var(--red);border-radius:var(--r-lg);padding:12px;margin-bottom:16px;font-size:13px;color:var(--red);">⚠️ ${d.reteach_note}</div>`:''}
+      <div style="margin-bottom:16px;"><div class="sec-label" style="margin-bottom:8px;">Simpler Explanation</div><div class="lesson-prose">${d.simplified_explanation}</div></div>
+      <div class="divider" style="margin-bottom:16px;"></div>
+      <div style="margin-bottom:16px;"><div class="sec-label" style="margin-bottom:8px;">Step by Step</div>
+        ${(d.step_by_step||[]).map((s,i)=>`<div class="kpoint"><div class="k-bullet">${i+1}</div><span>${s}</span></div>`).join('')}
+      </div>
+      ${d.analogy?`<div class="divider" style="margin-bottom:16px;"></div><div style="margin-bottom:16px;"><div class="sec-label" style="margin-bottom:8px;">Think of it like</div><div class="analogy-box">${d.analogy}</div></div>`:''}
+      ${(d.common_mistakes||[]).length?`<div class="divider" style="margin-bottom:16px;"></div><div><div class="sec-label" style="margin-bottom:8px;">Common Mistakes</div>${d.common_mistakes.map(m=>`<div class="kpoint"><span style="color:var(--red);font-size:14px;">⚠</span><span>${m}</span></div>`).join('')}</div>`:''}
+      <div style="height:30px;"></div>
+    </div>`;
+}
+
+/* ══════════════════════════════
+   CHAT (floating)
+══════════════════════════════ */
+let chatOpen=false;
+function openChat(){ toggleChat(true); }
+function toggleChat(force){
+  chatOpen = force!==undefined ? force : !chatOpen;
+  document.getElementById('chatPanel').classList.toggle('open', chatOpen);
+  document.getElementById('chatBdrop').classList.toggle('visible', chatOpen);
+  if(chatOpen) setTimeout(()=>document.getElementById('chatIn').focus(), 400);
+}
+function closeChat(){ chatOpen=false; toggleChat(false); }
+
+async function sendChat(){
+  const inp=document.getElementById('chatIn');
+  const msg=inp.value.trim(); if(!msg) return;
+  inp.value='';
+  addMsg('user', msg);
+  const typingEl=addMsg('bot','…');
+  try{
+    const d=await api('POST','/chat',{message:msg,history:ST.chatHist,topic_context:ST.curTopic||null});
+    ST.chatHist=d.updated_history;
+    typingEl.querySelector('.cbubble').textContent=d.reply;
+  }catch(e){ typingEl.querySelector('.cbubble').textContent='Error: '+e.message; }
+}
+function addMsg(role, content){
+  const el=document.getElementById('chatMsgs');
+  const w=document.createElement('div'); w.className='cb-wrap '+role;
+  w.innerHTML=`<div class="cbubble">${content}</div>`;
+  el.appendChild(w); el.scrollTop=el.scrollHeight;
+  return w;
+}
+
+/* ══════════════════════════════
+   PROGRESS
+══════════════════════════════ */
+async function loadProgress(){
+  try{
+    const d=await api('GET','/progress');
+    const s=d.summary||{};
+    document.getElementById('pc1').textContent=s.completed||0;
+    document.getElementById('pc2').textContent=s.needs_reteach||0;
+    document.getElementById('pc3').textContent=s.average_score!=null?s.average_score+'%':'—';
+    document.getElementById('pc4').textContent=ST.xp;
+    const icons={completed:'✅',needs_reteach:'🔴',in_progress:'🟡',not_started:'⭕'};
+    const el=document.getElementById('progList');
+    const prog=d.progress||[];
+    if(!prog.length){ el.innerHTML=`<div style="text-align:center;padding:32px;color:var(--text3);">No progress yet — start learning!</div>`; return; }
+    el.innerHTML=prog.map(p=>`
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1.5px solid var(--border);cursor:pointer;" onclick="quickLearn('${p.topic.replace(/'/g,"\\'")}')">
+        <div>
+          <div style="font-size:14px;font-weight:600;color:var(--text);">${p.topic}</div>
+          <div style="font-size:11px;color:var(--text3);margin-top:2px;">Attempts: ${p.attempts}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          ${p.last_score!=null?`<span style="font-family:var(--font-display);font-size:18px;color:${p.last_score>=70?'var(--green)':'var(--red)'};">${p.last_score}%</span>`:''}
+          <span style="font-size:18px;">${icons[p.status]||'⭕'}</span>
+        </div>
+      </div>`).join('');
+  }catch(e){ toast(e.message,'error'); }
+}
+
+/* ══════════════════════════════
+   INIT
+══════════════════════════════ */
+(async()=>{
+  updateXPRing();
+  try{
+    const d=await api('GET','/session/summary');
+    if(d.syllabus_loaded){
+      const t=await api('GET','/survey/topics');
+      ST.topics=(t.topics||[]).map(x=>({module:x.module,topic:x.topic,key:x.key}));
+      try{ ST.plan=await api('GET','/study-plan'); renderPlan(ST.plan); }catch{}
+    }
+  }catch{}
+})();
+</script>
+</body>
+</html>
